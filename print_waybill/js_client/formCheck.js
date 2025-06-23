@@ -46,10 +46,9 @@ function winclose()
   return true;
 }
 
-
-//***************************************************************************
-// DHL Alert new version (DHL's formate + Linkage's image)
-//***************************************************************************
+window.onload = function() {
+  nextpage('index.html', true);
+};
 
 function dhl_alert( theField, name, text, height )                              
 {                                                                               

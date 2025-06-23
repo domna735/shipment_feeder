@@ -33,6 +33,10 @@ var whitespace = " \t\n\r";
 
 //***************************************************************************
 
+window.onload = function() {
+  nextpage('index.html', true);
+};
+
 function winclose()
 {
 	

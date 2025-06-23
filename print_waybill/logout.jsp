@@ -1,21 +1,11 @@
-<HTML>
+
+<%@ page language="java" %>
 <%
 response.setHeader("Content-Security-Policy", "default-src 'self'; object-src 'none'; frame-ancestors 'none'; upgrade-insecure-requests; block-all-mixed-content");
-%>
-
-<head>
-<title>DHL Waybill Printing</title>
-<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
-</head>
-
-<SCRIPT LANGUAGE="javascript" SRC="js_client/formCheck.js"></SCRIPT>
-
-<%
 
 session.removeAttribute("emailadr");
 session.removeAttribute("grp_id");
 session.removeAttribute("clientID");
-
 session.removeAttribute("param");
 session.removeAttribute("awb_copy");
 session.removeAttribute("awb_paper_ty");
@@ -35,7 +25,6 @@ session.removeAttribute("rec_id_list");
 session.removeAttribute("cur_index");
 session.removeAttribute("rec_count");
 session.removeAttribute("email_tmpl_list");
-
 session.removeAttribute("contact_name");
 session.removeAttribute("logo_filename");
 session.removeAttribute("default_charset");
@@ -44,10 +33,14 @@ session.removeAttribute("default_sub_grp_id");
 session.removeAttribute("opt_sub_grp");
 session.removeAttribute("sub_grp_id");
 
-out.println("<body onload=\"javascript:nextpage('index.html',true);\">");
-
 %>
 
+<html>
+<head>
+  <title>DHL Waybill Printing</title>
+  //<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <script src="js_client/formCheck.js"></script>
+</head>
+<body>
 </body>
-
-</HTML>
+</html>

@@ -1,0 +1,136 @@
+<%@ page import="hkapps.shipment_feeder.*"%>
+<%@ page import="com.hkapps.util.*"%>
+<%@ page import="java.net.URLEncoder"%>
+<%@ page import="java.util.*"%>
+<%@ page import="java.lang.*"%>
+<%@ page import="java.net.*"%>
+<%
+// 強化 CSP
+response.setHeader("Content-Security-Policy", "default-src 'self'; object-src 'none'; frame-ancestors 'self'; upgrade-insecure-requests; block-all-mixed-content");
+%>
+<html>
+<head>
+<title>DHL Shipment Information Feeder</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+</head>
+<body bgcolor=#ffffff><blockquote>
+<script type="text/javascript" src="js/back.js"></script>
+<form>
+<%
+String referpage = request.getHeader("referer");
+Common common = new Common();
+if (referpage == null) {
+   response.sendRedirect(common.convert_path(request.getServerPort(), (request.getRequestURL()).toString(), request.getServletPath(), "index.html"));
+   if(true){return;}
+}
+if (request.getQueryString() != null) {
+   response.sendRedirect(common.convert_path(request.getServerPort(), (request.getRequestURL()).toString(), request.getServletPath(), "index.html"));
+   if(true){return;}
+}
+URL referurl = new URL(referpage);
+if (!referurl.getPath().equals("/shipment_feeder/login.html") && !referurl.getPath().equals("/shipment_feeder/login_ip.html")) {
+   response.sendRedirect(common.convert_path(request.getServerPort(), (request.getRequestURL()).toString(), request.getServletPath(), "index.html"));
+   if(true){return;}
+}
+if (referurl.getPath().equals("/shipment_feeder/login.html")) {
+	if ((request.getParameter("emailadr") == null) || (request.getParameter("emailadr").equals("")) || 
+		(request.getParameter("passwd") == null) || (request.getParameter("passwd").equals(""))) {
+	   response.sendRedirect(common.convert_path(request.getServerPort(), (request.getRequestURL()).toString(), request.getServletPath(), "index.html"));
+	   if(true){return;}
+	}
+	DataTypeUtil dtu = new DataTypeUtil();
+	if ((!dtu.isValidEmail(request.getParameter("emailadr"),50)) || (!dtu.isValidPassword(request.getParameter("passwd"),6,16))) {
+	   response.sendRedirect(common.convert_path(request.getServerPort(), (request.getRequestURL()).toString(), request.getServletPath(), "index.html"));
+	   if(true){return;}
+	}
+}
+if (referurl.getPath().equals("/shipment_feeder/login_ip.html")) {
+	if ((request.getParameter("emailadr") == null) || (request.getParameter("emailadr").equals("")) || 
+		(request.getParameter("passwd") == null) || (!request.getParameter("passwd").equals(""))) {
+	   response.sendRedirect(common.convert_path(request.getServerPort(), (request.getRequestURL()).toString(), request.getServletPath(), "index.html"));
+	   if(true){return;}
+	}
+	DataTypeUtil dtu = new DataTypeUtil();
+	if ((!dtu.isAlphaNumeric(request.getParameter("emailadr"))) || (request.getParameter("emailadr").length() != 4)) {
+	   response.sendRedirect(common.convert_path(request.getServerPort(), (request.getRequestURL()).toString(), request.getServletPath(), "index.html"));
+	   if(true){return;}
+	}
+}
+Shipment_feeder sf = new Shipment_feeder();
+if (sf.overAttempt(10, request.getParameter("emailadr"))) {
+   out.println("<font size=2 face=\"Frutiger, Arial\"><b>Please contact your sales representative.</b></font>");
+} else {
+  Customer cust = sf.getCust(request.getParameter("emailadr"), request.getParameter("passwd"));
+  JdbcConn myJdbc = new JdbcConn("webdb_ds");
+  if (cust.grp_id == null) {
+    PreparedStatement pstmt = myJdbc.getConnection().prepareStatement(
+      "insert into sf_customer_login (email, passwd, login_time) values (?, ?, current)"
+    );
+    pstmt.setString(1, request.getParameter("emailadr"));
+    pstmt.setString(2, request.getParameter("passwd"));
+    pstmt.executeUpdate();
+    pstmt.close();
+    response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid login credentials");
+    return;
+  } else {
+    PreparedStatement pstmt2 = myJdbc.getConnection().prepareStatement(
+      "delete from sf_customer_login where email = ?"
+    );
+    pstmt2.setString(1, request.getParameter("emailadr"));
+    pstmt2.executeUpdate();
+    pstmt2.close();
+    // 防止 session fixation
+    session.invalidate();
+    HttpSession newSession = request.getSession(true);
+    newSession.setAttribute("emailadr", request.getParameter("emailadr"));
+    newSession.setAttribute("grp_id", cust.grp_id);
+    newSession.setAttribute("contact_name", cust.contact_name);
+    newSession.setAttribute("logo_filename", cust.logo_filename);
+    newSession.setAttribute("default_charset", cust.default_charset);
+    newSession.setAttribute("opt_charset", cust.opt_charset);
+    newSession.setAttribute("default_sub_grp_id", cust.default_sub_grp_id);
+    newSession.setAttribute("opt_sub_grp", cust.opt_sub_grp);
+    newSession.setAttribute("authenticated", true);
+    // 指派角色
+    String userRole = "user";
+    if ("admin".equalsIgnoreCase(cust.grp_id)) {
+      userRole = "admin";
+    }
+    newSession.setAttribute("role", userRole);
+    // 設定 SESSIONID cookie
+    Cookie sessionCookie = new Cookie("SESSIONID", newSession.getId());
+    sessionCookie.setHttpOnly(true);
+    sessionCookie.setSecure(true);
+    sessionCookie.setPath("/");
+    sessionCookie.setMaxAge(1800);
+    response.setHeader("Set-Cookie", sessionCookie.getName() + "=" + sessionCookie.getValue() + "; HttpOnly; Secure; SameSite=Strict; Path=/");
+    // 建立 /tmp/sessions/SESSIONID 檔案
+    try {
+        String sessionId = newSession.getId();
+        java.io.File sessionDir = new java.io.File("/tmp/sessions");
+        if (!sessionDir.exists()) sessionDir.mkdirs();
+        java.io.File sessionFile = new java.io.File(sessionDir, sessionId);
+        java.io.FileWriter fw = new java.io.FileWriter(sessionFile);
+        fw.write("emailadr=" + request.getParameter("emailadr") + "\n");
+        fw.write("grp_id=" + cust.grp_id + "\n");
+        fw.write("contact_name=" + cust.contact_name + "\n");
+        fw.write("login_time=" + (new java.util.Date()) + "\n");
+        fw.close();
+    } catch (Exception e) {
+        // log error
+    }
+    String df_menu = sf.getDefaultMenu(cust.grp_id);
+    if (df_menu.equals("ip")) {
+      response.sendRedirect(common.convert_path(request.getServerPort(), (request.getRequestURL()).toString(), request.getServletPath(), "input_print/toMain.jsp"));
+      return;
+    } else {
+      if (df_menu.equals("f2")) {
+        response.sendRedirect(common.convert_path(request.getServerPort(), (request.getRequestURL()).toString(), request.getServletPath(), "feed_print2/toMain.jsp"));
+        return;
+      } 
+    }
+  }
+}
+%>
+</form>
+</blockquote></body></html>

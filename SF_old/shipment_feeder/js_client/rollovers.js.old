@@ -1,55 +1,48 @@
-function loadTop(head, logo, cname) {
-    const headElement = document.head;
-    const body = document.body;
 
-    // Add stylesheet
-    const link = document.createElement('link');
-    link.rel = 'stylesheet';
-    link.type = 'text/css';
-    link.href = '../common.css';
-    headElement.appendChild(link);
+function loadTop(head, logo, cname)
+{
+document.write('<link rel="STYLESHEET" type="text/css" href="../common.css">');	
+document.write('<SCRIPT LANGUAGE="javascript" SRC="../js_client/formCheck.js"></SCRIPT>');
+document.write('<BODY BGCOLOR="#FFFFFF" TEXT="#000000" topmargin="0" leftmargin="0" rightmargin="0" marginheight="0" marginwidth="0" SCROLL="NO">');
+document.write('<table width="100%" border="0" CELLSPACING=0 CELLPADDING=0>');
+document.write('<tr valign=top>');
 
-    // Create top bar
-    const table = document.createElement('table');
-    table.style.width = '100%';
-    table.cellSpacing = 0;
-    table.cellPadding = 0;
+if ((logo != "") && (logo != "null")) {
+ document.write('<td width="80%" valign=top>');
+} else {
+ document.write('<td width="103%">');
+}
+ 
+document.write('<table width="100%" border="0" CELLSPACING=0 CELLPADDING=0>');
+document.write('<tr bgcolor="#FFCC00"><td>&nbsp;</td></tr>');
+document.write('<tr bgcolor="#CC0000" valign="bottom"><td height="50">');
+document.write('<table height="100%" width="100%" border="0">');
+document.write("<tr valign=bottom><td width=2%>&nbsp;</td><td><font color=#FFFFFF size=4 face=Arial><b>"+head+"</b></font></td>");
+document.write('<td align=right width="30%"><font color=#FFFFFF size=2 face=Arial><b>');
 
-    const row = table.insertRow();
-    const cell = row.insertCell();
-    cell.colSpan = 2;
-
-    const innerTable = document.createElement('table');
-    innerTable.style.width = '100%';
-    innerTable.cellSpacing = 0;
-    innerTable.cellPadding = 0;
-
-    const innerRow = innerTable.insertRow();
-    innerRow.bgColor = '#CC0000';
-    const innerCell = innerRow.insertCell();
-    innerCell.innerHTML = `<font color="#FFFFFF" size="4" face="Arial"><b>${head}</b></font>`;
-
-    const rightCell = innerRow.insertCell();
-    rightCell.align = 'right';
-    rightCell.innerHTML = `<font color="#FFFFFF" size="2" face="Arial"><b>${cname ? 'Hello ' + cname : ''}</b></font>`;
-
-    innerRow.appendChild(innerCell);
-    innerRow.appendChild(rightCell);
-    innerTable.appendChild(innerRow);
-    cell.appendChild(innerTable);
-    row.appendChild(cell);
-
-    if (logo && logo !== 'null') {
-        const logoCell = row.insertCell();
-        const img = document.createElement('img');
-        img.src = `../images/logo/${logo}`;
-        img.alt = 'Logo';
-        logoCell.appendChild(img);
-    }
-
-    body.appendChild(table);
+if ((cname != "") && (cname != "null")) {
+ document.write('Hello '+cname);
+} else {
+ document.write('&nbsp;');
 }
 
+document.write('</b></font></td><td width=2%>&nbsp;</td>');
+document.write('</tr>');
+document.write('</table>');
+document.write('</td></tr>');
+document.write('</table>');
+document.write('</td>');
+
+if ((logo != "") && (logo != "null")) {
+ document.write('<td>');
+ document.write('<img src="../images/logo/' + logo + '" align="left" hspace="0">');
+ document.write('</td>');
+}
+
+document.write('</tr>');
+document.write('</table>');
+document.write('</body>');
+}
 
 function loadTop_frontpage()
 {
@@ -180,42 +173,38 @@ document.write('</body>');
 
 
 
-
-function doPopup(url) {
-    const scrWt = screen.availWidth || 800;
-    const scrHt = screen.availHeight || 600;
-    const winWt = Math.min(660, scrWt - 100);
-    const winHt = Math.min(488, scrHt - 75);
-    const posLinks = ((scrWt - winWt) / 2) + 20;
-    const posTop = ((scrHt - winHt) / 2 - 20) + 20;
-
-    const popup = window.open(url, 'bps', `noopener,noreferrer,width=${winWt},height=${winHt},left=${posLinks},top=${posTop},location=no,menubar=no,toolbar=no,scrollbars=yes,resizable=yes`);
-    if (popup) {
-        try { popup.opener = null; } catch (e) {}
-    }
+function doPopup(s) {
+	var scrWt=(screen.availWidth) ? screen.availWidth : 800;var scrHt=(screen.availHeight) ? screen.availHeight : 600;
+	//var winWt = 593;
+	var winWt = 660;
+	var winHt = 488;
+	if ((winWt > scrWt)) winWt=scrWt-100;
+	if ((winHt > scrHt-75)) winHt=scrHt-75;
+	var posLinks=((scrWt-winWt)/2)+20;
+	var posTop=((scrHt-winHt)/2-20)+20;
+        window.open(s, 'bps', 'width='+winWt+',height='+winHt+',left='+posLinks+',top='+posTop+',location=no,menubar=no,toolbar=no,scrollbars=yes,resizable=yes');
+ 
 }
-
 
 var image = new Object();
 
-
-const image = {};
-
-function preloadImage(name, state, src) {
-    if (!image[name]) image[name] = {};
-    image[name][state] = new Image();
-    image[name][state].src = src;
+function preloadImage(name, state, src)
+{
+  if (!image[name]) image[name] = new Object();
+  image[name][state] = new Image();
+  image[name][state].src = src;
 }
 
-function swapImageById(imgId, name, state) {
-    if (image[name]) {
-        const img = document.getElementById(imgId);
-        if (img) img.src = image[name][state].src;
-    }
+function swapImageById(img, name, state)
+{
+  if (image[name])
+  {
+     document.images[img].src = image[name][state].src;
+    
+  }
 }
 
-// Preload common images
 preloadImage('arrow', 'off', '../images/arrow_r.gif');
-
+preloadImage('arrow', 'on', '../images/arrow_y.gif');
 
 

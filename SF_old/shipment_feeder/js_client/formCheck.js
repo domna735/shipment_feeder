@@ -57,19 +57,18 @@ function dhl_alert( theField, name, text, height )
                                                                                 
   if (isNav) {                                                                  
     if (typeof(newWin) != "undefined" && !newWin.closed) newWin.close(); 
-    newWin=window.open("", "dhl_alert", "noopener,noreferrer,toolbar=no,location=no,directories=no,status=no,menubar=no,scrollbars=no,resizable=no,width=300,height=" + height);   
+    newWin=window.open("", "dhl_alert", "toolbar=no,location=no,directories=no,status=no,menubar=no,scrollbars=no,resizable=no,width=300,height=" + height);    
     newWin.focus(); 
   } else if (isIE4) {                                                           
     if (typeof(newWin) != "undefined" && !newWin.closed) newWin.close(); 
-    newWin=open("", "dhl_alert", "noopener,noreferrer,toolbar=no,location=no,directories=no,status=no,menubar=no,scrollbars=no,resizable=no,width=300,height=" + height);
+    newWin=open("", "dhl_alert", "toolbar=no,location=no,directories=no,status=no,menubar=no,scrollbars=no,resizable=no,width=300,height=" + height);
     newWin.focus();                                                             
   } else {                                                                      
     // all browsers with version 3.x or below
-    newWin=window.open("", "dhl_alert", "noopener,noreferrer,toolbar=no,location=no,directories=no,status=no,menubar=no,scrollbars=no,resizable=no,width=300,height=" + height);   
+    newWin=window.open("", "dhl_alert", "toolbar=no,location=no,directories=no,status=no,menubar=no,scrollbars=no,resizable=no,width=300,height=" + height);    
     newWin.focus();                                    
-  }                                                                            
+  }                                                                             
                                                                                 
-  newWin.document.write('<script>window.opener=null;<\/script>');
   newWin.document.write( "<HTML><HEAD><TITLE></TITLE></HEAD>\n")
 
 
